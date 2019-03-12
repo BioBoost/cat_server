@@ -3,7 +3,9 @@ const client  = mqtt.connect('mqtt://mqtt.labict.be');
 
 // Needs to be refactored to own file
 class Channel {
+
   constructor(mqttClient, channelName) {
+    this.BASE_TOPIC = 'oop2/cat/channel/';
     this.mqttClient = mqttClient;
     this.channelName = channelName;
     this.players = [];
@@ -11,13 +13,13 @@ class Channel {
   }
 
   subscribe() {
-    this.mqttClient.subscribe('oop2/cat/channel/' + this.channelName + '/#', (err) => {
+    this.mqttClient.subscribe(this.BASE_TOPIC + this.channelName + '/#', (err) => {
       if (!err) console.log("Subscribed");
     });
   }
 
   handle_message(topic, message) {
-    if (topic === 'oop2/cat/channel/' + this.channelName + '/join') {
+    if (topic === this.BASE_TOPIC + this.channelName + '/join') {
       this.add_player(message);
     }
   }
@@ -25,7 +27,7 @@ class Channel {
   add_player(playername) {
     console.log("Player " + playername + " joining the channel");
     this.players.push(playername);
-    this.mqttClient.publish('oop2/cat/channel/' + this.channelName + '/players', JSON.stringify(this.players));
+    this.mqttClient.publish(this.BASE_TOPIC + this.channelName + '/players', JSON.stringify(this.players));
   }
 }
 
