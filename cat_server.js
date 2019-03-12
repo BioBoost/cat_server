@@ -70,23 +70,28 @@ class Game {
   }
 
   join_channel(channelName, playerName) {
-    console.log(playerName + " wants to join the channel " + channelName);
+    let player = new Player(playerName);
+    console.log(player.get_name() + " wants to join the channel " + channelName);
     let channel = this.channels[channelName];
     if (channel) {
-      if (channel.add_player(new Player(playerName))) {
+      if (channel.add_player(player)) {
         this.publish_player_list(channel);
-        this.client.publish(this.PLAYER_TOPIC + "/" + playerName, JSON.stringify({ status: 'success'}));
+        this.message_player(player, JSON.stringify({ status: 'success', reason: 'joined channel ' + channel.get_name() }));
       } else {
-        this.client.publish(this.PLAYER_TOPIC + "/" + playerName, JSON.stringify({ status: 'failed', reason: 'channel is full or nickname in use'}));
+        this.message_player(player, JSON.stringify({ status: 'failed', reason: 'channel is full or nickname in use' }));
       }
     } else {
-      this.client.publish(this.PLAYER_TOPIC + "/" + playerName, JSON.stringify({ status: 'failed', reason: 'channel does not exist'}));
+      this.message_player(player, JSON.stringify({ status: 'failed', reason: 'channel does not exist' }));
     }
   }
   
   publish_player_list(channel) {
     this.client.publish(this.CHANNEL_TOPIC + "/" + channel.get_name()
       + '/players', JSON.stringify(Object.keys(channel.get_players())));
+  }
+
+  message_player(player, message) {
+    this.client.publish(this.PLAYER_TOPIC + "/" + player.get_name(), message);
   }
 }
 
