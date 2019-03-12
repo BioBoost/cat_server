@@ -1,48 +1,93 @@
 const mqtt = require('mqtt');
-const client  = mqtt.connect('mqtt://mqtt.labict.be');
+
+class Player {
+  constructor(name) {
+    this.name = name;
+  }
+
+  get_name() {
+    return this.name;
+  }
+}
 
 // Needs to be refactored to own file
 class Channel {
 
-  constructor(mqttClient, channelName) {
-    this.BASE_TOPIC = 'oop2/cat/channel/';
-    this.mqttClient = mqttClient;
-    this.channelName = channelName;
-    this.players = [];
-    this.subscribe();
+  constructor(name) {
+    this.name = name;
+    this.players = {};
   }
 
-  subscribe() {
-    this.mqttClient.subscribe(this.BASE_TOPIC + this.channelName + '/#', (err) => {
-      if (!err) console.log("Subscribed");
-    });
-  }
-
-  handle_message(topic, message) {
-    if (topic === this.BASE_TOPIC + this.channelName + '/join') {
-      this.add_player(message);
+  add_player(player) {
+    if (Object.keys(this.players).length < 5 && !this.players[player.get_name()]) {
+      console.log("Player " + player.get_name() + " joining the channel");
+      this.players[player.get_name()] = player;
+      return true;
     }
+    return false;
   }
 
-  add_player(playername) {
-    console.log("Player " + playername + " joining the channel");
-    this.players.push(playername);
-    this.mqttClient.publish(this.BASE_TOPIC + this.channelName + '/players', JSON.stringify(this.players));
+  get_players() {
+    return this.players;
+  }
+
+  get_name() {
+    return this.name;
   }
 }
 
-let channels = []
+class Game {
 
-client.on('connect', function () {
-  console.log("Connected to broker");
-  channels.push(new Channel(client, 'demo'));
-});
- 
-client.on('message', function (topic, message) {
-  // message is Buffer
-  console.log(message.toString());
+  constructor(mqttHost) {
+    console.log("Creating game server");
+    this.BASE_TOPIC = "oop2/cat";
+    this.JOIN_TOPIC = this.BASE_TOPIC + "/join";
+    this.CHANNEL_TOPIC = this.BASE_TOPIC + "/channel";
+    this.PLAYER_TOPIC = this.BASE_TOPIC + "/players";
 
-  if (topic.startsWith("oop2/cat/channel/demo")) {
-    channels[0].handle_message(topic, message.toString());
+    this.channels = {};
+    this.client = mqtt.connect('mqtt://' + mqttHost);
+    this.client.on('connect', () => this.handle_connected() );
   }
-});
+
+  handle_connected() {
+    console.log("Connected to broker - Creating demo channel");
+    this.channels['demo'] = new Channel('demo');        // Just for starting      
+    this.client.subscribe(this.BASE_TOPIC + '/#', (err) => {
+      if (!err) console.log("Subscribed successfully");
+    });
+    this.client.on('message', (topic, message) => this.handle_mqtt_message(topic, message) );
+  }
+
+  handle_mqtt_message(topic, message) {
+    message = message.toString();
+    console.log("Receiving: " + message + " @ " + topic);
+
+    if (topic === this.JOIN_TOPIC) {
+      let joinRequest = JSON.parse(message);   // { "channel": "demo", "player": "Nico" }
+      this.join_channel(joinRequest.channel, joinRequest.player);
+    }
+  }
+
+  join_channel(channelName, playerName) {
+    console.log(playerName + " wants to join the channel " + channelName);
+    let channel = this.channels[channelName];
+    if (channel) {
+      if (channel.add_player(new Player(playerName))) {
+        this.publish_player_list(channel);
+        this.client.publish(this.PLAYER_TOPIC + "/" + playerName, JSON.stringify({ status: 'success'}));
+      } else {
+        this.client.publish(this.PLAYER_TOPIC + "/" + playerName, JSON.stringify({ status: 'failed', reason: 'channel is full or nickname in use'}));
+      }
+    } else {
+      this.client.publish(this.PLAYER_TOPIC + "/" + playerName, JSON.stringify({ status: 'failed', reason: 'channel does not exist'}));
+    }
+  }
+  
+  publish_player_list(channel) {
+    this.client.publish(this.CHANNEL_TOPIC + "/" + channel.get_name()
+      + '/players', JSON.stringify(Object.keys(channel.get_players())));
+  }
+}
+
+let game = new Game('mqtt.labict.be');
