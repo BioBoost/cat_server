@@ -10,12 +10,29 @@ class Player {
   }
 }
 
+class Card {
+  constructor(owner, text) {
+    this.owner = owner;
+    this.text = text;
+  }
+
+  get_owner() {
+    return this.owner;
+  }
+
+  get_text() {
+    return this.text;
+  }
+}
+
 // Needs to be refactored to own file
 class Channel {
 
   constructor(name) {
     this.name = name;
     this.players = {};
+    this.playedCards = [];
+    this.question = "Who looks like what?";
   }
 
   add_player(player) {
@@ -27,12 +44,25 @@ class Channel {
     return false;
   }
 
+  get_player(name) {
+    return this.players[name];
+  }
+
   get_players() {
     return this.players;
   }
 
   get_name() {
     return this.name;
+  }
+
+  add_card(card) {
+    // Check if player not already played card!
+    this.playedCards.push(card);
+  }
+
+  get_cards() {
+    return this.playedCards;
   }
 }
 
@@ -63,9 +93,19 @@ class Game {
     message = message.toString();
     console.log("Receiving: " + message + " @ " + topic);
 
-    if (topic === this.JOIN_TOPIC) {
-      let joinRequest = JSON.parse(message);   // { "channel": "demo", "player": "Nico" }
-      this.join_channel(joinRequest.channel, joinRequest.player);
+    let data = JSON.parse(message);
+    if (topic === this.JOIN_TOPIC) {       // { "channel": "demo", "player": "Nico" }
+      this.join_channel(data.channel, data.player);
+    } else if (topic.startsWith(this.CHANNEL_TOPIC)) {
+      console.log("Receiving channel data");
+      let parts = topic.split(this.CHANNEL_TOPIC+'/').join('').split('/');
+      let channel = this.channels[parts[0]];
+      if (channel) {
+        console.log("Receiving data for channel " + channel.get_name());
+        if (parts[1] === 'playcard') {    // { "card": "Little Trump", "player": "Nico" }
+          this.handle_playing_card(channel, data);
+        }
+      }
     }
   }
 
@@ -92,6 +132,30 @@ class Game {
 
   message_player(player, message) {
     this.client.publish(this.PLAYER_TOPIC + "/" + player.get_name(), message);
+  }
+
+  handle_playing_card(channel, data) {
+    let player = channel.get_player(data.player);
+    if (player) {
+      let card = new Card(player, data.card);
+      console.log(player.get_name() + " played card " + card.get_text());
+      channel.add_card(card);
+      this.publish_all_played_cards(channel);
+    } else {
+      this.message_player(new Player(data.player), JSON.stringify({ status: 'failed', reason: 'did not join the channel ' + channel.get_name() }));
+    }
+  }
+
+  publish_all_played_cards(channel) {
+    let output = {
+      question: channel.question,
+      responses: channel.get_cards().map(function(card){
+        return { player: card.owner.name, card: card.text };
+      })
+    };
+
+    this.client.publish(this.CHANNEL_TOPIC + "/" + channel.get_name()
+      + '/playedcards', JSON.stringify(output));
   }
 }
 
