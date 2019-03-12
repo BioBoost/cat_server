@@ -1,0 +1,25 @@
+{
+  "name": "cat_server",
+  "version": "0.1.0",
+  "description": "Cards Against Teachers Server",
+  "main": "cat_server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node cat_server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/BioBoost/cat_server.git"
+  },
+  "keywords": [
+    "mqtt",
+    "server",
+    "cat"
+  ],
+  "author": "Nico De Witte <nico.dewitte@outlook.com>",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/BioBoost/cat_server/issues"
+  },
+  "homepage": "https://github.com/BioBoost/cat_server#readme"
+}
