@@ -1,19 +1,5 @@
 # Cards Against Teachers Server
 
-## Using Docker
-
-Build the container:
-
-```shell
-docker build -t cat-server .
-```
-
-Run it interactively:
-
-```shell
-docker run -it --rm -p 3000:3000 cat-server
-```
-
 ## API
 
 ### Joining an existing channel
@@ -89,3 +75,45 @@ Data:
 ```
 
 The responses each have a player id assigned to them that is only known server-side, and is randomly determined every round. So client-side, the player only knows which card he/she played him/herself.
+
+## Development
+
+### Setup Game Server
+
+When deploying your own game server it is important to realize that if you do not change the default MQTT server (labict.be) or the base topic, it will interfere with the production game server.
+
+So before setting up your own game server, please change the base topic (in `cat_server.js`) to your own personal topic. For example `test/oop2/yourname/cat`.
+
+After that you can start the game server using a manual approach or as a docker container.
+
+#### Manual Approach
+
+This approach requires nodejs to be installed on your development host.
+
+Make sure all modules are installed:
+
+```shell
+npm install
+```
+
+Start server:
+
+```shell
+npm start
+```
+
+#### Using Docker
+
+This approach requires docker to be installed on your development host.
+
+Build the container:
+
+```shell
+docker build -t cat-server .
+```
+
+Run it interactively:
+
+```shell
+docker run -it --rm -p 3000:3000 cat-server
+```
