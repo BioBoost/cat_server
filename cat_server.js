@@ -1,20 +1,6 @@
 const mqtt = require('mqtt');
 const Player = require('./lib/player.js')
-
-class Card {
-  constructor(owner, text) {
-    this.owner = owner;
-    this.text = text;
-  }
-
-  get_owner() {
-    return this.owner;
-  }
-
-  get_text() {
-    return this.text;
-  }
-}
+const Card = require('./lib/card.js');
 
 // Needs to be refactored to own file
 class Channel {
