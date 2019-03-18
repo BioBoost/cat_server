@@ -1,14 +1,5 @@
 const mqtt = require('mqtt');
-
-class Player {
-  constructor(name) {
-    this.name = name;
-  }
-
-  get_name() {
-    return this.name;
-  }
-}
+const Player = require('./lib/player.js')
 
 class Card {
   constructor(owner, text) {
