@@ -26,6 +26,14 @@ The full list of players in a channel is published at `oop2/cat/channel/demo/pla
 
 Data: `["snarly","bios","rambo"]`
 
+### Chatting
+
+Each channel also has a chat topic which can be used to interact between players. Just subscribe to the topic and publish messages shown in the format below. Each message should be accompanied by the sender of the message.
+
+Topic: `oop2/cat/channel/demo/chat`
+
+Data: `{ "player": "snarly", "message": "Hi, where u guys all from ?" }`
+
 ### Playing a Card
 
 After receiving a question card, each player can publish an answer card in response. This needs to happen within the given timeframe.
