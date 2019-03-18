@@ -1,5 +1,7 @@
 # Cards Against Teachers Server
 
+This is the game server of the Cards Against Teacher game. It is a simplified version of the well-known Cards Against Humanity game.
+
 ## API
 
 ### Joining an existing channel
