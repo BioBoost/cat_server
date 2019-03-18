@@ -14,8 +14,5 @@ RUN npm install
 # Copy the application files
 COPY . .
 
-# Expose port 3000 from node
-EXPOSE 3000
-
 # The final command that starts the app
 CMD ["npm", "start"]
