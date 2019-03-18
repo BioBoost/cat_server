@@ -57,8 +57,12 @@ class Channel {
   }
 
   add_card(card) {
-    // Check if player not already played card!
-    this.playedCards.push(card);
+    // Check if player not already played card
+    if (!this.playedCards.filter( c => c.owner.name === card.owner.name ).length) {
+      this.playedCards.push(card);
+    } else {
+      console.log("Player " + card.owner.name + " already played card");
+    }
   }
 
   get_cards() {
@@ -149,7 +153,7 @@ class Game {
   publish_all_played_cards(channel) {
     let output = {
       question: channel.question,
-      responses: channel.get_cards().map(function(card){
+      responses: channel.get_cards().map(function(card) {
         return { player: card.owner.name, card: card.text };
       })
     };
