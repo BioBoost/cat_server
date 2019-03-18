@@ -1,0 +1,7 @@
+version: "3"
+services:
+  server:
+    image: bioboost/cards-against-teachers-server:latest
+    restart: always
+    networks:
+      - default
