@@ -28,6 +28,20 @@ The full list of players in a channel is published at `oop2/cat/channel/demo/pla
 
 Data: `["snarly","bios","rambo"]`
 
+### Leaving a channel
+
+Make sure to leave a channel before closing your game client. Otherwise you will not be able to join the channel afterwards.
+
+To leave publish a message to the topic below:
+
+Topic: `oop2/cat/leave`
+
+Data: `{ "channel": "demo", "player": "snarly" }`
+
+This will trigger an update of the currently active players on the channel at the topic `oop2/cat/channel/demo/players`.
+
+Data: `["bios","rambo"]`
+
 ### Chatting
 
 Each channel also has a chat topic which can be used to interact between players. Just subscribe to the topic and publish messages shown in the format below. Each message should be accompanied by the sender of the message.
