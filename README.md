@@ -1,5 +1,19 @@
 # Cards Against Teachers Server
 
+## Using Docker
+
+Build the container:
+
+```shell
+docker build -t cat-server .
+```
+
+Run it interactively:
+
+```shell
+docker run -it --rm -p 3000:3000 cat-server
+```
+
 ## API
 
 ### Joining an existing channel
