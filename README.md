@@ -4,9 +4,11 @@ This is the game server of the Cards Against Teacher game. It is a simplified ve
 
 ## API
 
-### Joining an existing channel
+Actions against the API are most of the time confirmed on the player topic `oop2/cat/players/snarly` where `snarly` is the name of the player. So it is always a good idea to first subscribe to this topic and act upon the received messages at this topic.
 
-Before you can join a game, you need to join an existing channel.
+### Joining a  channel
+
+Before starting a game, all players that wish to play together need to join the same channel. If the channel does not exist yet, the channel is automatically created by the first player requesting to join it.
 
 Topic: `oop2/cat/join`
 
